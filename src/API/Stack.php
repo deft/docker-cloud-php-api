@@ -1,6 +1,5 @@
 <?php
 
-
 namespace DockerCloud\API;
 
 use DockerCloud\Model\Response\StackGetListResponse as GetListResponse;
@@ -57,7 +56,6 @@ class Stack extends AbstractApplicationAPI
             ->request('GET', $this->getAPINameSpace(), ['query' => $filters]));
     }
 
-
     /**
      * @param $uuid
      *
@@ -112,12 +110,18 @@ class Stack extends AbstractApplicationAPI
     /**
      * @param $uuid
      *
+     * @param bool $isReuseVolumes
+     *
      * @return Model
      * @throws \DockerCloud\Exception
      */
-    public function redeploy($uuid)
+    public function redeploy($uuid, $isReuseVolumes = true)
     {
-        return new Model($this->getClient()->request('POST', $this->getAPINameSpace() . $uuid . '/redeploy/'));
+        return new Model($this->getClient()->request('POST', $this->getAPINameSpace() . $uuid . '/redeploy/', [
+            'body' => Json::encode([
+                'reuse_volumes' => $isReuseVolumes
+            ])
+        ]));
     }
 
     /**
@@ -152,7 +156,7 @@ class Stack extends AbstractApplicationAPI
     public function findByName($name)
     {
         $GetListResponse = $this->getList(['name' => $name]);
-        $totalCount      = $GetListResponse->getMeta()->getTotalCount();
+        $totalCount = $GetListResponse->getMeta()->getTotalCount();
         if (1 <= $totalCount) {
             return $GetListResponse->getObjects()[$totalCount - 1];
         }
